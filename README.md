@@ -57,7 +57,7 @@ A beautiful, interactive web application for visualizing and analyzing sentiment
 
 1. **Download/Clone the files:**
    ```
-   git clone [repository-url]
+   git clone [https://github.com/YoRzHe-HotaaRu/SentiNik.git]
    cd SentiNik
    ```
 
