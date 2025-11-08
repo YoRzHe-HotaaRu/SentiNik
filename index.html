@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SentiNik - Sentiment Analysis Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <h1>SentiNik</h1>
+                </div>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalReviews">-</span>
+                        <span class="stat-label">Total Reviews</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalGames">-</span>
+                        <span class="stat-label">Games Analyzed</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="avgSentiment">-</span>
+                        <span class="stat-label">Avg Sentiment</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Filters -->
+            <div class="filters-section">
+                <div class="filters-card">
+                    <h3><i class="fas fa-filter"></i> Filters & Controls</h3>
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label for="gameFilter">Game:</label>
+                            <select id="gameFilter">
+                                <option value="all">All Games</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="sentimentFilter">Sentiment:</label>
+                            <select id="sentimentFilter">
+                                <option value="all">All Sentiments</option>
+                                <option value="positive">Positive</option>
+                                <option value="negative">Negative</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="ratingFilter">Rating:</label>
+                            <select id="ratingFilter">
+                                <option value="all">All Ratings</option>
+                                <option value="1">1 Star</option>
+                                <option value="2">2 Stars</option>
+                                <option value="3">3 Stars</option>
+                                <option value="4">4 Stars</option>
+                                <option value="5">5 Stars</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="searchInput">Search Reviews:</label>
+                            <input type="text" id="searchInput" placeholder="Search in review text...">
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button id="resetFilters" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset Filters
+                        </button>
+                        <button id="exportData" class="btn btn-primary">
+                            <i class="fas fa-download"></i> Export Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="charts-grid">
+                <!-- Overview Cards -->
+                <div class="chart-card full-width">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-pie"></i> Sentiment Distribution Overview</h3>
+                        <div class="chart-controls">
+                            <button class="chart-tab-btn active" data-chart="sentimentDist">Distribution</button>
+                            <button class="chart-tab-btn" data-chart="confidenceDist">Confidence</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="sentimentDistributionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Game Comparison -->
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-gamepad"></i> Game Comparison</h3>
+                        <div class="view-toggle">
+                            <button class="view-btn active" data-view="sentiment">Sentiment</button>
+                            <button class="view-btn" data-view="ratings">Ratings</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="gameComparisonChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Temporal Trends -->
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-line"></i> Sentiment Trends Over Time</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="temporalTrendsChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Rating vs Sentiment -->
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-star"></i> Rating vs Sentiment Correlation</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="ratingSentimentChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Playtime Analysis -->
+                <div class="chart-card full-width">
+                    <div class="card-header">
+                        <h3><i class="fas fa-clock"></i> Playtime vs Sentiment Analysis</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="playtimeSentimentChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Word Cloud -->
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-cloud"></i> Top Words (Positive Reviews)</h3>
+                    </div>
+                    <div class="chart-container">
+                        <div id="wordCloud" class="word-cloud-container"></div>
+                    </div>
+                </div>
+
+                <!-- Confidence Distribution -->
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-bullseye"></i> Sentiment Confidence</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="confidenceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Details Modal -->
+            <div id="gameModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 id="modalGameTitle">Game Details</h2>
+                        <button class="modal-close" onclick="closeGameModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="modalGameStats" class="modal-stats"></div>
+                        <div id="modalGameChart" class="modal-chart">
+                            <canvas id="modalGameChartCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Summary Table -->
+            <div class="data-table-section">
+                <div class="table-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-table"></i> Review Data Summary</h3>
+                        <button id="toggleTable" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-eye"></i> Show/Hide Table
+                        </button>
+                    </div>
+                    <div id="dataTableContainer" class="table-container">
+                        <table id="reviewsTable" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Game</th>
+                                    <th>Rating</th>
+                                    <th>Sentiment</th>
+                                    <th>Confidence</th>
+                                    <th>Helpful</th>
+                                    <th>Playtime</th>
+                                    <th>Review Text</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reviewsTableBody">
+                                <!-- Table data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <p>&copy; 2025 SentiNik. Sentiment Analysis Dashboard for Game Reviews.</p>
+                    <p>Built with ❤️ using HTML, CSS, JavaScript & Chart.js</p>
+                </div>
+                <div class="footer-links">
+                    <a href="#" class="footer-link"><i class="fab fa-github"></i></a>
+                    <a href="#" class="footer-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="footer-link"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <i class="fas fa-chart-line fa-spin"></i>
+            <p>Analyzing sentiment data...</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
